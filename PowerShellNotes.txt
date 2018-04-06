@@ -1,0 +1,82 @@
+#what version of powershell is being used
+    #download the latest version of Windows Management framework(WMF)
+    #to update powershell
+    #https://docs.microsoft.com/en-us/powershell/wmf/readme
+    #https://docs.microsoft.com/en-us/powershell/scripting/whats-new/what-s-new-with-powershell?view=powershell-6
+
+    get-host #will show the powershell version
+#three most important commands
+#get-help
+    get-help Get-Service -Examples #get information about a cmdelt
+    get-help about_* #get information about any concept
+    get-help about_array*
+#get-command - use this to find a particular cmdlet
+    get-command -verb get -noun *service*  
+    get-command -noun *service*
+#Get-Member - this will help you find an objects type along with property and method
+    get-service | Get-Member
+#variables are used to store objects in memory or other data for short periods of time
+#make sure to name variables something meaningful
+    get-variable #will show all variables currently defined in session
+    get-variable *pref*
+
+    #must start with a $ and is alphanumeric
+    $test_variable = 1
+    $test_variable = "this is a test"
+#arrays
+    #Use it to store multiple objects
+    $array_example = "dog","cat","frog"
+    $phone = "123-456-7890"
+    $phone = $phone -split "-" # using split will allow you to turn a string of test to an array
+    $phone[2]
+    #reference item in array by position
+    $array_example[2]
+
+#hashtable
+    #they are kind of like array but referenced by index
+    $hash = @{Dog="Yellow";Cat="black"}
+    
+    $hash.dog
+    #help clean up cmdlets using splatting with hast table
+    $hash_splat = @{name="w32time"}
+    get-service @hash_splat
+
+#there are lots of time you can pass multiple values into a single parameter of a cmdlet
+$select_properties = "name","status","description"
+get-service | select $select_properties
+
+#pipeline
+    #only show certain properties of the objects by passing
+    #the objects to a select-object cmdlet
+    get-service | select name, status
+    #collect all the objects and filter using the where-object cmdlet.  
+    #Remember try to filter prior to collecting everything to increase performance
+    #and to put less load on the host
+    get-service | where status -eq running
+    # the object moving through the pipeline is represented by $_
+    get-service -PipelineVariable service | where {$_.status -eq "running" -and $_.name -like "w*"}
+    #there are going to be times you will need to create a new pipeline while in another pipeline.
+    #when this happens if you have to refer to the original object in the pipeline $_
+    #will no longer work leverage the pipeline variable for this case and readability
+    get-service -PipelineVariable service | where {$service.status -eq "running" -and $service.name -like "w*"}
+    #great way to view data
+    get-service | out-gridview
+    get-service | export-csv c:\data\services.csv -NoTypeInformation
+    import-csv c:\data\services.csv | out-gridview
+
+#using foreach object is ideal for doing several things within the pipeline.
+#it can also be used for filtering
+get-service | foreach-object{
+    $_ | stop-service -whatif
+    $_ | start-service -whatif
+}
+
+#Modules contain cmdlets if you are missing cmdlets
+#you are more than likely missing the module
+#most modules can be found here: https://www.powershellgallery.com/
+#if running at least 5.0 Windows management framework use find-module *topic*
+#or are part of the Windows Remote Server Admin Toolkit (RSAT)
+
+
+
+
